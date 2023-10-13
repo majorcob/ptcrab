@@ -7,7 +7,7 @@ pub trait FromRead<T>: Sized {
     /// Error type on read failure.
     type Error: StdError;
 
-    /// Constructs `Self` by reading data from a given source.
+    /// Constructs `T` by reading data from a given source.
     fn from_read<R: Read>(source: &mut R) -> Result<T, Self::Error>;
 }
 
