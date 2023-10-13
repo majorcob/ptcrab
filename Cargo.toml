@@ -1,0 +1,10 @@
+[package]
+name = "ptcrab"
+version = "0.0.0"
+description = "A pure-Rust alternative to the official pxtone library."
+authors = ["Jacob Cazabon <j@cob.im>"]
+repository = "https://github.com/majorcob/ptcrab/"
+license = "MIT"
+edition = "2021"
+
+[dependencies]
