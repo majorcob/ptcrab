@@ -8,3 +8,4 @@ license = "MIT"
 edition = "2021"
 
 [dependencies]
+duplicate = "1.0.0"
