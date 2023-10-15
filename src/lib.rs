@@ -1,6 +1,7 @@
 //! A pure-Rust alternative to [the official pxtone library](https://pxtone.org/developer/).
 
 pub mod data;
+pub mod ptvoice;
 
 /// Re-exports for common use cases.
 pub mod prelude {
