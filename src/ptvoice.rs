@@ -15,7 +15,7 @@ use std::io::Read;
 /// Collection of ptvoice units.
 pub type PtvUnits = (); // TODO
 
-/// Synthesized instrument composed of sine overtones and drawn waveforms.
+/// Synthesized instrument made up of sine overtones and drawn waveforms.
 pub struct Ptvoice {
     /// Basic-key applied to the entire project voice in old pxtone versions. Each voice-unit has
     /// its own basic-key in newer versions, so this is set to 0 and goes unused.
