@@ -1,5 +1,8 @@
 //! A pure-Rust alternative to [the official pxtone library](https://pxtone.org/developer/).
 
+mod value;
+pub use value::*;
+
 pub mod data;
 pub mod ptvoice;
 pub mod voice;
