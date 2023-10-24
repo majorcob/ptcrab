@@ -1,6 +1,6 @@
-use crate::data::{FromRead, FromReadVar};
+use crate::data::{FromRead, FromReadVar, WriteTo, WriteVarTo};
 
-use std::io::{Error as IoError, Read};
+use std::io::{Error as IoError, Read, Seek, Write};
 
 /// Voice-unit configuration.
 pub struct VoiceFlags {
@@ -29,6 +29,12 @@ impl VoiceFlags {
             beat_fit: (value & Self::BEAT_FIT) != 0,
         })
     }
+
+    fn as_u32(&self) -> u32 {
+        (if self.wave_loop { Self::WAVE_LOOP } else { 0 })
+            | (if self.smooth { Self::SMOOTH } else { 0 })
+            | (if self.beat_fit { Self::BEAT_FIT } else { 0 })
+    }
 }
 
 impl FromRead<Option<Self>> for VoiceFlags {
@@ -44,5 +50,21 @@ impl FromReadVar<Option<Self>> for VoiceFlags {
 
     fn from_read_var<R: Read>(source: &mut R) -> Result<Option<Self>, Self::Error> {
         u32::from_read_var(source).map(Self::from_u32)
+    }
+}
+
+impl WriteTo for VoiceFlags {
+    type Error = IoError;
+
+    fn write_to<W: Write + Seek>(&self, sink: &mut W) -> Result<u64, Self::Error> {
+        self.as_u32().write_to(sink)
+    }
+}
+
+impl WriteVarTo for VoiceFlags {
+    type Error = IoError;
+
+    fn write_var_to<W: Write + Seek>(&self, sink: &mut W) -> Result<u64, Self::Error> {
+        self.as_u32().write_var_to(sink)
     }
 }
