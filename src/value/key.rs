@@ -1,11 +1,11 @@
 /// Expression of pitch where 256 "key" increments = 1 semitone.
 ///
-/// A value of 0 is equivalent to A<sub>(-4)</sub> (~1.72 Hz); "key" is thus represented as the
-/// distance from that pitch 1/256th-semitone increments. For example, A<sub>4</sub> is 96 semitones
+/// A value of 0 is equivalent to A<sub>(-4)</sub>; "key" is thus represented as the distance from
+/// A<sub>(-4)</sub> in 1/256th-semitone increments. For example, A<sub>4</sub> is 96 semitones
 /// above A<sub>(-4)</sub>, so it is represented using a key value of 96 × 256 = `0x6000`.
 ///
-/// pxtone sometimes refers to key relative to A<sub>4</sub> (instead of A<sub>(-4)</sub>) so that
-/// commonly used pitches produce shorter encoded sequences.
+/// pxtone sometimes refers to key relative to A<sub>4</sub> instead of A<sub>(-4)</sub> so that
+/// commonly used pitches can be encoded into shorter sequences.
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[repr(transparent)]
 pub struct Key(i32);

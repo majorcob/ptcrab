@@ -9,6 +9,7 @@ mod unit;
 pub use self::unit::*;
 
 use crate::data::{FromRead, FromReadVar};
+use crate::Key;
 
 use std::io::Read;
 
@@ -19,15 +20,14 @@ pub type PtvUnits = (); // TODO
 pub struct Ptvoice {
     /// Basic-key applied to the entire project voice in old pxtone versions. Each voice-unit has
     /// its own basic-key in newer versions, so this is set to 0 and goes unused.
-    pub legacy_basic_key: i32,
-
+    pub legacy_basic_key: Key,
     /// ptvoices can contain multiple units, each with its own waveform, parameters, and envelope.
     pub units: PtvUnits,
 }
 
 impl Ptvoice {
     /// String present at the start of ptvoice data.
-    const SIGNATURE: &[u8; 8] = b"PTVOICE-";
+    const SIGNATURE: [u8; 8] = *b"PTVOICE-";
     /// Maximum supported format version.
     #[allow(clippy::inconsistent_digit_grouping)]
     const VERSION: i32 = 2006_01_11;
@@ -38,7 +38,7 @@ impl FromRead<Self> for Ptvoice {
 
     fn from_read<R: Read>(source: &mut R) -> Result<Self, Self::Error> {
         // Check signature at start of data.
-        if <[u8; Self::SIGNATURE.len()]>::from_read(source)? != *Self::SIGNATURE {
+        if <[u8; Self::SIGNATURE.len()]>::from_read(source)? != Self::SIGNATURE {
             return Err(PtvError::Invalid);
         }
         // Check that format version is supported.
@@ -48,7 +48,7 @@ impl FromRead<Self> for Ptvoice {
         // Length of remaining data. pxtone doesn't actually verify this.
         let _data_len = i32::from_read(source)?;
 
-        let legacy_basic_key = i32::from_read_var(source)?;
+        let legacy_basic_key = i32::from_read_var(source)?.into();
         // Reserved two zeroes.
         for _ in 0..2 {
             if i32::from_read_var(source)? != 0 {

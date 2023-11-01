@@ -10,4 +10,5 @@ pub mod voice;
 /// Re-exports for common use cases.
 pub mod prelude {
     pub use super::data::{FromRead, WriteTo};
+    pub use super::Key;
 }
