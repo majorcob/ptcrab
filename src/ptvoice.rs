@@ -4,8 +4,8 @@
 //! samples.
 
 mod error;
-pub use self::error::*;
 mod unit;
+pub use self::error::*;
 pub use self::unit::*;
 
 use crate::data::{FromRead, FromReadVar};

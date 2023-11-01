@@ -6,7 +6,7 @@
 ///
 /// pxtone sometimes refers to key relative to A<sub>4</sub> instead of A<sub>(-4)</sub> so that
 /// commonly used pitches can be encoded into shorter sequences.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug)]
 #[repr(transparent)]
 pub struct Key(i32);
 
@@ -112,5 +112,11 @@ impl Key {
 impl From<i32> for Key {
     fn from(value: i32) -> Self {
         Self(value)
+    }
+}
+
+impl Default for Key {
+    fn default() -> Self {
+        Self::A4
     }
 }
