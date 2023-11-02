@@ -2,6 +2,8 @@ use duplicate::duplicate_item;
 use std::error::Error as StdError;
 use std::io::{Error as IoError, Read};
 
+//--------------------------------------------------------------------------------------------------
+
 /// Provides a constructor that reads data from some source.
 pub trait FromRead<T>: Sized {
     /// Error type on read failure.

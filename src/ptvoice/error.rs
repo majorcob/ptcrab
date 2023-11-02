@@ -1,6 +1,8 @@
 use std::io::Error as IoError;
 use thiserror::Error as ThisError;
 
+//--------------------------------------------------------------------------------------------------
+
 /// Errors arising from ptvoice operations.
 #[derive(Debug, ThisError)]
 pub enum PtvError {

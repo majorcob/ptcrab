@@ -2,6 +2,8 @@ use duplicate::duplicate_item;
 use std::error::Error as StdError;
 use std::io::{Error as IoError, Seek, Write};
 
+//--------------------------------------------------------------------------------------------------
+
 /// Allows encoding `self` as bytes written to some sink.
 pub trait WriteTo {
     /// Error type on write/seek failure.

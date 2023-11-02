@@ -13,6 +13,8 @@ use crate::Key;
 
 use std::io::Read;
 
+//--------------------------------------------------------------------------------------------------
+
 /// Collection of ptvoice units.
 pub type PtvUnits = (); // TODO
 

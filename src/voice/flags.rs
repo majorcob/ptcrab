@@ -2,6 +2,8 @@ use crate::data::{FromRead, FromReadVar, WriteTo, WriteVarTo};
 
 use std::io::{Error as IoError, Read, Seek, Write};
 
+//--------------------------------------------------------------------------------------------------
+
 /// Voice-unit configuration.
 pub struct VoiceFlags {
     /// Repeats the waveform for the full note duration (vs. being a one-off sample).

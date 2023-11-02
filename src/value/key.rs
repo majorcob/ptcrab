@@ -6,7 +6,7 @@
 ///
 /// pxtone sometimes refers to key relative to A<sub>4</sub> instead of A<sub>(-4)</sub> so that
 /// commonly used pitches can be encoded into shorter sequences.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 #[repr(transparent)]
 pub struct Key(i32);
 

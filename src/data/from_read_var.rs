@@ -4,6 +4,8 @@ use duplicate::duplicate_item;
 use std::error::Error as StdError;
 use std::io::{Error as IoError, Read};
 
+//--------------------------------------------------------------------------------------------------
+
 /// Provides a constructor that reads an [unsigned LEB128](https://en.wikipedia.org/wiki/LEB128#Unsigned_LEB128)
 /// sequence from some source.
 pub trait FromReadVar<T>: Sized {
