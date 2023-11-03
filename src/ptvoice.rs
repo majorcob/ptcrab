@@ -9,14 +9,15 @@ pub use self::error::*;
 pub use self::unit::*;
 
 use crate::data::{FromRead, FromReadVar};
-use crate::Key;
+use crate::{Key, MaxLenI32};
 
 use std::io::Read;
 
 //--------------------------------------------------------------------------------------------------
 
+type PtvSignature = [u8; 8];
 /// Collection of ptvoice units.
-pub type PtvUnits = (); // TODO
+pub type PtvUnits = MaxLenI32<PtvUnit>;
 
 /// Synthesized instrument made up of sine overtones and drawn waveforms.
 pub struct Ptvoice {
@@ -29,7 +30,7 @@ pub struct Ptvoice {
 
 impl Ptvoice {
     /// String present at the start of ptvoice data.
-    const SIGNATURE: [u8; 8] = *b"PTVOICE-";
+    const SIGNATURE: PtvSignature = *b"PTVOICE-";
     /// Maximum supported format version.
     #[allow(clippy::inconsistent_digit_grouping)]
     const VERSION: i32 = 2006_01_11;
@@ -40,7 +41,7 @@ impl FromRead<Self> for Ptvoice {
 
     fn from_read<R: Read>(source: &mut R) -> Result<Self, Self::Error> {
         // Check signature at start of data.
-        if <[u8; Self::SIGNATURE.len()]>::from_read(source)? != Self::SIGNATURE {
+        if Self::SIGNATURE != PtvSignature::from_read(source)? {
             return Err(PtvError::Invalid);
         }
         // Check that format version is supported.
@@ -58,9 +59,21 @@ impl FromRead<Self> for Ptvoice {
             }
         }
 
+        // Read units...
+        let unit_count = match usize::try_from(i32::from_read_var(source)?) {
+            Ok(unit_count) if (unit_count <= PtvUnits::MAX) => unit_count,
+            _ => return Err(PtvError::Invalid),
+        };
+        let units = (0..unit_count)
+            .map(|_| PtvUnit::from_read(source))
+            .collect::<Result<Box<[_]>, _>>()
+            .map(PtvUnits::new)?
+            // SANITY: Checked unit count before reading, so slice should be acceptable length.
+            .unwrap();
+
         Ok(Self {
             legacy_basic_key,
-            units: PtvUnits::default(), // TODO
+            units,
         })
     }
 }

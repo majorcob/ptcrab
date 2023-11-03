@@ -1,5 +1,9 @@
+use super::PtvError;
+use crate::data::FromRead;
 use crate::voice::VoiceFlags;
 use crate::{Key, PanVolume, Tuning, Volume};
+
+use std::io::Read;
 
 //--------------------------------------------------------------------------------------------------
 
@@ -13,4 +17,12 @@ pub struct PtvUnit {
     pub flags: VoiceFlags,
     pub wave: Option<()>,     // TODO
     pub envelope: Option<()>, // TODO
+}
+
+impl FromRead<Self> for PtvUnit {
+    type Error = PtvError;
+
+    fn from_read<R: Read>(source: &mut R) -> Result<Self, Self::Error> {
+        todo!()
+    }
 }
