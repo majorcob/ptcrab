@@ -11,15 +11,13 @@ pub use self::unit::*;
 pub use self::wave::*;
 
 use crate::data::{FromRead, FromReadVar};
-use crate::{Key, MaxLenI32};
+use crate::Key;
 
 use std::io::Read;
 
 //--------------------------------------------------------------------------------------------------
 
 type PtvSignature = [u8; 8];
-/// Collection of ptvoice units.
-pub type PtvUnits = MaxLenI32<PtvUnit>;
 
 /// Synthesized instrument made up of sine overtones and drawn waveforms.
 pub struct Ptvoice {
@@ -27,7 +25,7 @@ pub struct Ptvoice {
     /// its own basic-key in newer versions, so this is set to 0 and goes unused.
     pub legacy_basic_key: Key,
     /// ptvoices can contain multiple units, each with its own waveform, parameters, and envelope.
-    pub units: PtvUnits,
+    pub units: Box<[PtvUnit]>,
 }
 
 impl Ptvoice {
@@ -62,16 +60,11 @@ impl FromRead<Self> for Ptvoice {
         }
 
         // Read units...
-        let unit_count = match usize::try_from(i32::from_read_var(source)?) {
-            Ok(unit_count) if (unit_count <= PtvUnits::MAX) => unit_count,
-            _ => return Err(PtvError::Invalid),
-        };
+        let unit_count =
+            usize::try_from(i32::from_read_var(source)?).map_err(|_| PtvError::Invalid)?;
         let units = (0..unit_count)
             .map(|_| PtvUnit::from_read(source))
-            .collect::<Result<Box<[_]>, _>>()
-            .map(PtvUnits::new)?
-            // SANITY: Checked unit count before reading, so slice should be acceptable length.
-            .unwrap();
+            .collect::<Result<Box<[_]>, _>>()?;
 
         Ok(Self {
             legacy_basic_key,
