@@ -1,13 +1,14 @@
 use super::{PtvEnvelope, PtvError, PtvWave};
-use crate::data::{FromRead, FromReadVar};
+use crate::data::{FromRead, FromReadVar, WriteTo, WriteVarTo};
 use crate::voice::VoiceFlags;
 use crate::{Key, PanVolume, Tuning, Volume};
 
-use std::io::Read;
+use std::io::{Read, Seek, Write};
 
 //--------------------------------------------------------------------------------------------------
 
 /// Single ptvoice "channel" with its own waveform, parameters, and envelope.
+#[derive(Debug)]
 pub struct PtvUnit {
     pub basic_key: Key,
     pub volume: Volume,
@@ -58,5 +59,13 @@ impl FromRead<Self> for PtvUnit {
             wave,
             envelope,
         })
+    }
+}
+
+impl WriteTo for PtvUnit {
+    type Error = PtvError;
+
+    fn write_to<W: Write + Seek>(&self, sink: &mut W) -> Result<u64, Self::Error> {
+        todo!()
     }
 }

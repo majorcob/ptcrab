@@ -6,6 +6,7 @@ use std::io::Read;
 //--------------------------------------------------------------------------------------------------
 
 /// Ptvoice waveform composed of either coordinate points or sine overtones.
+#[derive(Debug)]
 pub enum PtvWave {
     Coordinate {
         /// Points `(x, y)` that make up the waveform.

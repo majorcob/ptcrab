@@ -6,6 +6,7 @@ use std::io::{Error as IoError, Read};
 //--------------------------------------------------------------------------------------------------
 
 /// Ptvoice envelope defined by a sequence of points.
+#[derive(Debug)]
 pub struct PtvEnvelope {
     /// List of absolute points `(x, y)` in the envelope. The last point in this list will be
     /// sustained while a note is held.

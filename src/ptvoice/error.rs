@@ -14,7 +14,7 @@ pub enum PtvError {
     Invalid,
     /// Ptvoice data has too many items or is too long to encode its own length.
     #[error("ptvoice data exceeds maximum")]
-    OverMaximum,
+    OverMax,
 
     /// I/O error while reading/writing ptvoice data.
     #[error("ptvoice I/O failure: {0}")]

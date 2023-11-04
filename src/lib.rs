@@ -12,5 +12,6 @@ pub mod voice;
 /// Re-exports for common use cases.
 pub mod prelude {
     pub use super::data::{FromRead, WriteTo};
+    pub use super::ptvoice::{PtvEnvelope, PtvError, PtvUnit, PtvWave, Ptvoice};
     pub use super::{Key, PanVolume, Tuning, Volume};
 }

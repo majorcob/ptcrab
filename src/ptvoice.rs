@@ -12,16 +12,18 @@ pub use self::error::*;
 pub use self::unit::*;
 pub use self::wave::*;
 
-use crate::data::{FromRead, FromReadVar};
+use crate::data::{FromRead, FromReadVar, WriteTo, WriteVarTo};
 use crate::Key;
 
-use std::io::Read;
+use std::io::SeekFrom;
+use std::io::{Read, Seek, Write};
 
 //--------------------------------------------------------------------------------------------------
 
 type PtvSignature = [u8; 8];
 
 /// Synthesized instrument made up of sine overtones and drawn waveforms.
+#[derive(Debug)]
 pub struct Ptvoice {
     /// Basic-key applied to the entire project voice in old pxtone versions. Each voice-unit has
     /// its own basic-key in newer versions, so this is set to 0 and goes unused.
@@ -72,5 +74,40 @@ impl FromRead<Self> for Ptvoice {
             legacy_basic_key,
             units,
         })
+    }
+}
+
+impl WriteTo for Ptvoice {
+    type Error = PtvError;
+
+    fn write_to<W: Write + Seek>(&self, sink: &mut W) -> Result<u64, Self::Error> {
+        // Ptvoice signature and format version.
+        let start_pos = Self::SIGNATURE.write_to(sink)?;
+        Self::VERSION.write_to(sink)?;
+        // Placeholder for remaining data length (to be written later).
+        let data_len_pos = 0_i32.write_to(sink)?;
+
+        // Legacy basic-key.
+        let data_start = self.legacy_basic_key.as_value().write_var_to(sink)?;
+        // Reserved data.
+        0_i32.write_var_to(sink)?;
+        0_i32.write_var_to(sink)?;
+
+        // Units...
+        i32::try_from(self.units.len())
+            .map_err(|_| PtvError::OverMax)?
+            .write_var_to(sink)?;
+        self.units
+            .iter()
+            .try_for_each(|unit| unit.write_to(sink).map(|_| ()))?;
+
+        // Go back to update data length.
+        let data_end = sink.stream_position()?;
+        let data_len = i32::try_from(data_end - data_start).map_err(|_| PtvError::OverMax)?;
+        sink.seek(SeekFrom::Start(data_len_pos))?;
+        data_len.write_to(sink)?;
+        sink.seek(SeekFrom::Start(data_end))?;
+
+        Ok(start_pos)
     }
 }
