@@ -12,9 +12,9 @@ pub enum PtvError {
     /// Ptvoice data is malformed or contains an illegal value.
     #[error("invalid ptvoice data")]
     Invalid,
-    /// Ptvoice data is too long to encode its own length.
-    #[error("ptvoice data is too long")]
-    TooLong,
+    /// Ptvoice data has too many items or is too long to encode its own length.
+    #[error("ptvoice data exceeds maximum")]
+    OverMaximum,
 
     /// I/O error while reading/writing ptvoice data.
     #[error("ptvoice I/O failure: {0}")]

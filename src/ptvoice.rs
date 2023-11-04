@@ -5,8 +5,10 @@
 
 mod error;
 mod unit;
+mod wave;
 pub use self::error::*;
 pub use self::unit::*;
+pub use self::wave::*;
 
 use crate::data::{FromRead, FromReadVar};
 use crate::{Key, MaxLenI32};
