@@ -46,3 +46,15 @@ impl FromRead<Self> for _Num_ {
         read_n(source).map(Self::from_le_bytes)
     }
 }
+
+impl<X, Y> FromRead<Self> for (X, Y)
+where
+    X: FromRead<X, Error = IoError>,
+    Y: FromRead<Y, Error = IoError>,
+{
+    type Error = IoError;
+
+    fn from_read<R: Read>(source: &mut R) -> Result<Self, Self::Error> {
+        X::from_read(source).and_then(|x| Y::from_read(source).map(|y| (x, y)))
+    }
+}

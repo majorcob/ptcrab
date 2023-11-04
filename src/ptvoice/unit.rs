@@ -1,4 +1,4 @@
-use super::PtvError;
+use super::{PtvEnvelope, PtvError, PtvWave};
 use crate::data::{FromRead, FromReadVar};
 use crate::voice::VoiceFlags;
 use crate::{Key, PanVolume, Tuning, Volume};
@@ -15,8 +15,8 @@ pub struct PtvUnit {
     pub tuning: Tuning,
 
     pub flags: VoiceFlags,
-    pub wave: Option<()>,     // TODO
-    pub envelope: Option<()>, // TODO
+    pub wave: Option<PtvWave>,
+    pub envelope: Option<PtvEnvelope>,
 }
 
 impl PtvUnit {
@@ -41,8 +41,12 @@ impl FromRead<Self> for PtvUnit {
         if (data_flags & Self::RESERVED) != 0 {
             return Err(PtvError::Invalid);
         }
-        let wave = ((data_flags & Self::HAS_WAVE) != 0).then(|| todo!());
-        let envelope = ((data_flags & Self::HAS_ENVELOPE) != 0).then(|| todo!());
+        let wave = ((data_flags & Self::HAS_WAVE) != 0)
+            .then(|| PtvWave::from_read(source))
+            .transpose()?;
+        let envelope = ((data_flags & Self::HAS_ENVELOPE) != 0)
+            .then(|| PtvEnvelope::from_read(source))
+            .transpose()?;
 
         Ok(Self {
             basic_key,

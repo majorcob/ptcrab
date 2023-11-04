@@ -43,3 +43,15 @@ impl FromReadVar<Self> for _Num32_ {
         Ok(result.to_le_bytes()).map(Self::from_le_bytes)
     }
 }
+
+impl<X, Y> FromReadVar<Self> for (X, Y)
+where
+    X: FromReadVar<X, Error = IoError>,
+    Y: FromReadVar<Y, Error = IoError>,
+{
+    type Error = IoError;
+
+    fn from_read_var<R: Read>(source: &mut R) -> Result<Self, Self::Error> {
+        X::from_read_var(source).and_then(|x| Y::from_read_var(source).map(|y| (x, y)))
+    }
+}

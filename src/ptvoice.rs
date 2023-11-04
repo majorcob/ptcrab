@@ -3,9 +3,11 @@
 //! Not to be confused with a "project voice", which includes ptvoices, ptnoises, and PCM/Vorbis
 //! samples.
 
+mod envelope;
 mod error;
 mod unit;
 mod wave;
+pub use self::envelope::*;
 pub use self::error::*;
 pub use self::unit::*;
 pub use self::wave::*;

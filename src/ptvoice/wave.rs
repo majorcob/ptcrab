@@ -5,7 +5,7 @@ use std::io::Read;
 
 //--------------------------------------------------------------------------------------------------
 
-/// A ptvoice waveform, composed of either coordinate points or sine overtones.
+/// Ptvoice waveform composed of either coordinate points or sine overtones.
 pub enum PtvWave {
     Coordinate {
         /// Points `(x, y)` that make up the waveform.
@@ -34,10 +34,10 @@ impl FromRead<Self> for PtvWave {
                 let point_count =
                     usize::try_from(i32::from_read_var(source)?).map_err(|_| PtvError::Invalid)?;
                 let x_width = i32::from_read_var(source)?;
+
+                // Read `(x, y)` pairs.
                 let points = (0..point_count)
-                    .map(|_| {
-                        u8::from_read(source).and_then(|x| i8::from_read(source).map(|y| (x, y)))
-                    })
+                    .map(|_| <(u8, i8)>::from_read(source))
                     .collect::<Result<Box<[_]>, _>>()?;
 
                 Ok(PtvWave::Coordinate { points, x_width })
@@ -46,12 +46,10 @@ impl FromRead<Self> for PtvWave {
             Self::OSCILLATOR => {
                 let overtone_count =
                     usize::try_from(i32::from_read_var(source)?).map_err(|_| PtvError::Invalid)?;
+
+                // Read `(overtone_num, amplitude)` pairs.
                 let overtones = (0..overtone_count)
-                    .map(|_| {
-                        i32::from_read_var(source).and_then(|index| {
-                            i32::from_read_var(source).map(|amplitude| (index, amplitude))
-                        })
-                    })
+                    .map(|_| <(i32, i32)>::from_read_var(source))
                     .collect::<Result<Box<[_]>, _>>()?;
 
                 Ok(Self::Oscillator { overtones })
