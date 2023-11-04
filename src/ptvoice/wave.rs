@@ -48,8 +48,8 @@ impl FromRead<Self> for PtvWave {
                     usize::try_from(i32::from_read_var(source)?).map_err(|_| PtvError::Invalid)?;
                 let overtones = (0..overtone_count)
                     .map(|_| {
-                        i32::from_read(source).and_then(|index| {
-                            i32::from_read(source).map(|amplitude| (index, amplitude))
+                        i32::from_read_var(source).and_then(|index| {
+                            i32::from_read_var(source).map(|amplitude| (index, amplitude))
                         })
                     })
                     .collect::<Result<Box<[_]>, _>>()?;
