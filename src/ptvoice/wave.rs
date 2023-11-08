@@ -1,12 +1,12 @@
 use super::PtvError;
-use crate::data::{FromRead, FromReadVar};
+use crate::data::{FromRead, FromReadVar, WriteTo, WriteVarTo};
 
-use std::io::Read;
+use std::io::{Read, Seek, Write};
 
 //--------------------------------------------------------------------------------------------------
 
 /// Ptvoice waveform composed of either coordinate points or sine overtones.
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum PtvWave {
     Coordinate {
         /// Points `(x, y)` that make up the waveform.
@@ -58,6 +58,47 @@ impl FromRead<Self> for PtvWave {
 
             // Unknown wave type.
             _ => Err(PtvError::Invalid),
+        }
+    }
+}
+
+impl WriteTo for PtvWave {
+    type Error = PtvError;
+
+    fn write_to<W: Write + Seek>(&self, sink: &mut W) -> Result<u64, Self::Error> {
+        match &self {
+            Self::Coordinate { points, x_width } => {
+                let start_pos = Self::COORDINATE.write_var_to(sink)?;
+
+                i32::try_from(points.len())
+                    .map_err(|_| PtvError::OverMax)?
+                    .write_var_to(sink)?;
+                x_width.write_var_to(sink)?;
+
+                // Write `(x, y)` pairs.
+                for (x, y) in points.iter() {
+                    x.write_to(sink)?;
+                    y.write_to(sink)?;
+                }
+
+                Ok(start_pos)
+            }
+
+            Self::Oscillator { overtones } => {
+                let start_pos = Self::OSCILLATOR.write_var_to(sink)?;
+
+                i32::try_from(overtones.len())
+                    .map_err(|_| PtvError::OverMax)?
+                    .write_var_to(sink)?;
+
+                // Write `(overtone_num, amplitude)` pairs.
+                for (overtone_num, amplitude) in overtones.iter() {
+                    overtone_num.write_var_to(sink)?;
+                    amplitude.write_var_to(sink)?;
+                }
+
+                Ok(start_pos)
+            }
         }
     }
 }

@@ -48,3 +48,17 @@ impl WriteVarTo for _Num32_ {
         Ok(start_pos)
     }
 }
+
+impl<X, Y> WriteVarTo for (X, Y)
+where
+    X: WriteVarTo<Error = IoError>,
+    Y: WriteVarTo<Error = IoError>,
+{
+    type Error = IoError;
+
+    fn write_var_to<W: Write + Seek>(&self, sink: &mut W) -> Result<u64, Self::Error> {
+        self.0
+            .write_var_to(sink)
+            .and_then(|start_pos| self.1.write_var_to(sink).map(|_| start_pos))
+    }
+}

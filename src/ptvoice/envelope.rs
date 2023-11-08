@@ -1,27 +1,27 @@
 use super::PtvError;
-use crate::data::{FromRead, FromReadVar};
+use crate::data::{FromRead, FromReadVar, WriteTo, WriteVarTo};
 
-use std::io::{Error as IoError, Read};
+use std::io::{Read, Seek, Write};
 
 //--------------------------------------------------------------------------------------------------
 
 /// Ptvoice envelope defined by a sequence of points.
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct PtvEnvelope {
     /// List of absolute points `(x, y)` in the envelope. The last point in this list will be
     /// sustained while a note is held.
     pub points: Box<[(i32, i32)]>,
     /// Release duration, in the same units as envelope point x-values.
     pub release: i32,
-    /// TODO: Envelope x-units per second?
-    pub fps: i32,
+    /// Envelope x-units per second; usually set to 1000 so each x-unit equals one millisecond.
+    pub ticks_per_second: i32,
 }
 
 impl FromRead<Self> for PtvEnvelope {
     type Error = PtvError;
 
     fn from_read<R: Read>(source: &mut R) -> Result<Self, Self::Error> {
-        let fps = i32::from_read_var(source)?;
+        let ticks_per_second = i32::from_read_var(source)?;
         let point_count =
             usize::try_from(i32::from_read_var(source)?).map_err(|_| PtvError::Invalid)?;
         // Read unused point counts, verifying that their values are 0 and 1 respectively. These are
@@ -33,15 +33,14 @@ impl FromRead<Self> for PtvEnvelope {
 
         // Read "attack" points, which should consist of every envelope point except the last.
         // x-values are relative to the previous point, so also track absolute x-value.
-        let points = (0..point_count)
-            .try_fold((vec![], 0), |(mut points, prev_x), _| {
-                let (dx, y) = <(i32, i32)>::from_read_var(source)?;
-                let x = prev_x + dx;
-                points.push((x, y));
-
-                Ok::<(Vec<(i32, i32)>, i32), IoError>((points, x))
-            })
-            .map(|(points, _)| points.into_boxed_slice())?;
+        let mut points = vec![];
+        let mut prev_x = 0;
+        for _ in 0..point_count {
+            let (dx, y) = <(i32, i32)>::from_read_var(source)?;
+            prev_x += dx;
+            points.push((prev_x, y));
+        }
+        let points = points.into_boxed_slice();
 
         // Read single release point. pxtone hardcodes a 0 for the release y-value, so the y-value
         // obtained here goes unused.
@@ -50,7 +49,32 @@ impl FromRead<Self> for PtvEnvelope {
         Ok(Self {
             points,
             release,
-            fps,
+            ticks_per_second,
         })
+    }
+}
+
+impl WriteTo for PtvEnvelope {
+    type Error = PtvError;
+
+    fn write_to<W: Write + Seek>(&self, sink: &mut W) -> Result<u64, Self::Error> {
+        let start_pos = self.ticks_per_second.write_var_to(sink)?;
+        i32::try_from(self.points.len())
+            .map_err(|_| PtvError::OverMax)?
+            .write_var_to(sink)?;
+        // Unused sustain & release point counts, always expected to be 0 and 1.
+        0_i32.write_var_to(sink)?;
+        1_i32.write_var_to(sink)?;
+
+        // Write points.
+        let mut prev_x = 0;
+        for &(x, y) in self.points.iter() {
+            (x - prev_x, y).write_var_to(sink)?;
+            prev_x = x;
+        }
+        // Write single release point.
+        (self.release, 0_i32).write_var_to(sink)?;
+
+        Ok(start_pos)
     }
 }

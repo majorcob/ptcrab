@@ -8,7 +8,7 @@ use std::io::{Read, Seek, Write};
 //--------------------------------------------------------------------------------------------------
 
 /// Single ptvoice "channel" with its own waveform, parameters, and envelope.
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct PtvUnit {
     pub basic_key: Key,
     pub volume: Volume,
@@ -66,6 +66,29 @@ impl WriteTo for PtvUnit {
     type Error = PtvError;
 
     fn write_to<W: Write + Seek>(&self, sink: &mut W) -> Result<u64, Self::Error> {
-        todo!()
+        let start_pos = self.basic_key.as_value().write_var_to(sink)?;
+        self.volume.as_value().write_var_to(sink)?;
+        self.pan_volume.as_value().write_var_to(sink)?;
+        f32::from(self.tuning).write_var_to(sink)?;
+
+        self.flags.write_var_to(sink)?;
+
+        // Wave & envelope data if present.
+        let mut data_flags = 0_u32;
+        if self.wave.is_some() {
+            data_flags |= Self::HAS_WAVE;
+        }
+        if self.envelope.is_some() {
+            data_flags |= Self::HAS_ENVELOPE;
+        }
+        data_flags.write_var_to(sink)?;
+        if let Some(wave) = &self.wave {
+            wave.write_to(sink)?;
+        }
+        if let Some(envelope) = &self.envelope {
+            envelope.write_to(sink)?;
+        }
+
+        Ok(start_pos)
     }
 }

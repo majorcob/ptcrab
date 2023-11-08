@@ -23,7 +23,7 @@ use std::io::{Read, Seek, Write};
 type PtvSignature = [u8; 8];
 
 /// Synthesized instrument made up of sine overtones and drawn waveforms.
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Ptvoice {
     /// Basic-key applied to the entire project voice in old pxtone versions. Each voice-unit has
     /// its own basic-key in newer versions, so this is set to 0 and goes unused.
@@ -97,9 +97,9 @@ impl WriteTo for Ptvoice {
         i32::try_from(self.units.len())
             .map_err(|_| PtvError::OverMax)?
             .write_var_to(sink)?;
-        self.units
-            .iter()
-            .try_for_each(|unit| unit.write_to(sink).map(|_| ()))?;
+        for unit in self.units.iter() {
+            unit.write_to(sink)?;
+        }
 
         // Go back to update data length.
         let data_end = sink.stream_position()?;
