@@ -7,7 +7,7 @@ use std::io::{Read, Seek, Write};
 
 //--------------------------------------------------------------------------------------------------
 
-/// Single ptvoice "channel" with its own waveform, parameters, and envelope.
+/// Single ptvoice "channel" with its own waveform, envelope, and parameters.
 #[derive(Clone, Debug, PartialEq)]
 pub struct PtvUnit {
     pub basic_key: Key,
@@ -16,7 +16,10 @@ pub struct PtvUnit {
     pub tuning: Tuning,
 
     pub flags: VoiceFlags,
+    /// Unit's waveform. pxtone technically allows this to be absent, but will crash if it attempts
+    /// to play a voice-unit without a waveform.
     pub wave: Option<PtvWave>,
+    /// Unit's envelope. If absent, volume will just remain constant during a note.
     pub envelope: Option<PtvEnvelope>,
 }
 

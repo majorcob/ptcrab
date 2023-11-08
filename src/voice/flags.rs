@@ -7,7 +7,7 @@ use std::io::{Error as IoError, Read, Seek, Write};
 /// Voice-unit configuration.
 #[derive(Clone, Debug, PartialEq)]
 pub struct VoiceFlags {
-    /// Repeats the waveform for the full note duration (vs. being a one-off sample).
+    /// Repeats the waveform for the full note duration (as opposed to being a one-off sample).
     pub wave_loop: bool,
     /// Adds a very slight fadeout on note release.
     pub smooth: bool,

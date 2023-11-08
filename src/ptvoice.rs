@@ -81,7 +81,7 @@ impl WriteTo for Ptvoice {
     type Error = PtvError;
 
     fn write_to<W: Write + Seek>(&self, sink: &mut W) -> Result<u64, Self::Error> {
-        // Ptvoice signature and format version.
+        // ptvoice signature and format version.
         let start_pos = Self::SIGNATURE.write_to(sink)?;
         Self::VERSION.write_to(sink)?;
         // Placeholder for remaining data length (to be written later).

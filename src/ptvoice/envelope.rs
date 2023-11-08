@@ -5,23 +5,24 @@ use std::io::{Read, Seek, Write};
 
 //--------------------------------------------------------------------------------------------------
 
-/// Ptvoice envelope defined by a sequence of points.
+/// Ptvoice envelope defined by a sequence of points `(x, y)`, where the x-axis represents time and
+/// the y-axis represents volume.
 #[derive(Clone, Debug, PartialEq)]
 pub struct PtvEnvelope {
     /// List of absolute points `(x, y)` in the envelope. The last point in this list will be
     /// sustained while a note is held.
     pub points: Box<[(i32, i32)]>,
-    /// Release duration, in the same units as envelope point x-values.
+    /// Release duration in x-units.
     pub release: i32,
-    /// Envelope x-units per second; usually set to 1000 so each x-unit equals one millisecond.
-    pub ticks_per_second: i32,
+    /// Envelope x-units per second. Usually set to 1000 so that 1 x-unit = 1 millisecond.
+    pub x_per_second: i32,
 }
 
 impl FromRead<Self> for PtvEnvelope {
     type Error = PtvError;
 
     fn from_read<R: Read>(source: &mut R) -> Result<Self, Self::Error> {
-        let ticks_per_second = i32::from_read_var(source)?;
+        let x_per_second = i32::from_read_var(source)?;
         let point_count =
             usize::try_from(i32::from_read_var(source)?).map_err(|_| PtvError::Invalid)?;
         // Read unused point counts, verifying that their values are 0 and 1 respectively. These are
@@ -49,7 +50,7 @@ impl FromRead<Self> for PtvEnvelope {
         Ok(Self {
             points,
             release,
-            ticks_per_second,
+            x_per_second,
         })
     }
 }
@@ -58,7 +59,7 @@ impl WriteTo for PtvEnvelope {
     type Error = PtvError;
 
     fn write_to<W: Write + Seek>(&self, sink: &mut W) -> Result<u64, Self::Error> {
-        let start_pos = self.ticks_per_second.write_var_to(sink)?;
+        let start_pos = self.x_per_second.write_var_to(sink)?;
         i32::try_from(self.points.len())
             .map_err(|_| PtvError::OverMax)?
             .write_var_to(sink)?;
