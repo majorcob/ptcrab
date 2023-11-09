@@ -26,8 +26,8 @@ impl Key {
     /// assert_eq!(Key::A4, Key::from_a4_offset(0));
     /// assert_eq!(Key::C4, Key::from_a4_offset(-9 * 256));
     /// ```
-    pub fn from_a4_offset(a4_offset: i32) -> Self {
-        Self::from(Self::A4.as_value() + a4_offset)
+    pub const fn from_a4_offset(a4_offset: i32) -> Self {
+        Self(Self::A4.as_value() + a4_offset)
     }
     /// Converts from a "basic key" value.
     ///
@@ -41,7 +41,7 @@ impl Key {
     /// assert_eq!(Key::A4, Key::from_basic(Key::BASIC));
     /// assert_eq!(Key::C4, Key::from_basic(Key::BASIC + (9 * 256)));
     /// ```
-    pub fn from_basic(basic: i32) -> Self {
+    pub const fn from_basic(basic: i32) -> Self {
         Self::from_a4_offset(Self::BASIC - basic)
     }
     /// Approximates key based on distance in semitones from A<sub>(-4)</sub>.
@@ -120,7 +120,7 @@ impl Key {
     /// assert_eq!(Key::A4.as_basic(), Key::BASIC);
     /// assert_eq!(Key::C4.as_basic(), Key::BASIC + (9 * 256));
     /// ```
-    pub fn as_basic(&self) -> i32 {
+    pub const fn as_basic(&self) -> i32 {
         Self::BASIC - self.as_a4_offset()
     }
     /// Returns distance in semitones from A<sub>(-4)</sub>.

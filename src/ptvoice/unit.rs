@@ -10,14 +10,21 @@ use std::io::{Read, Seek, Write};
 /// Single ptvoice "channel" with its own waveform, envelope, and parameters.
 #[derive(Clone, Debug, PartialEq)]
 pub struct PtvUnit {
+    /// Since ptvoices don't really have an inherent pitch (as opposed to samples), this is usually
+    /// just set to A<sub>6</sub> (basic key `0x2D00`) by default. However, changing this allows for
+    /// some interesting harmonic effects on a single ptvoice.
     pub inherent_key: Key,
+    /// Overall volume for this unit.
     pub volume: Volume,
+    /// Relative stereo channel volumes for this unit.
     pub pan_volume: PanVolume,
+    /// Tuning value for this unit.
     pub tuning: Tuning,
 
+    /// Unit voice flags.
     pub flags: VoiceFlags,
     /// Unit waveform. pxtone technically allows this to be absent, but tends to crash or behave
-    /// unexpectedly while working with such voice-units. Omit with caution.
+    /// unexpectedly. Omit with caution.
     pub wave: Option<PtvWave>,
     /// Unit envelope. If absent, volume will remain constant throughout a note's duration.
     pub envelope: Option<PtvEnvelope>,
@@ -93,5 +100,28 @@ impl WriteTo for PtvUnit {
         }
 
         Ok(start_pos)
+    }
+}
+
+impl Default for PtvUnit {
+    fn default() -> Self {
+        Self {
+            inherent_key: Key::from_basic(0x2D00),
+            volume: Volume::from(64),
+            pan_volume: PanVolume::CENTER,
+            tuning: Tuning::default(),
+
+            flags: VoiceFlags {
+                wave_loop: true,
+                smooth: true,
+                beat_fit: false,
+            },
+
+            wave: Some(PtvWave::Coordinate {
+                points: Box::new([(0, 0)]),
+                x_width: 256,
+            }),
+            envelope: None,
+        }
     }
 }

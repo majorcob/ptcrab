@@ -22,8 +22,8 @@ impl PanVolume {
     /// assert_eq!(PanVolume::CENTER, PanVolume::from_separate(64, 64));
     /// assert_eq!(PanVolume::RIGHT,  PanVolume::from_separate(0,  64));
     /// ```
-    pub fn from_separate(left: i32, right: i32) -> Self {
-        Self::from(if left < 64 { 128 - left } else { right })
+    pub const fn from_separate(left: i32, right: i32) -> Self {
+        Self(if left < 64 { 128 - left } else { right })
     }
     /// Converts from left and right volume ratios.
     ///
@@ -45,7 +45,7 @@ impl PanVolume {
     /// assert_eq!(PanVolume::CENTER.as_value(), 64);
     /// assert_eq!(PanVolume::RIGHT.as_value(),  128);
     /// ```
-    pub fn as_value(&self) -> i32 {
+    pub const fn as_value(&self) -> i32 {
         self.0
     }
     /// Returns panning as left and right values out of 64.

@@ -102,3 +102,12 @@ impl WriteTo for PtvWave {
         }
     }
 }
+
+impl Default for PtvWave {
+    fn default() -> Self {
+        Self::Coordinate {
+            points: Box::new([(0, 0)]),
+            x_width: 256,
+        }
+    }
+}

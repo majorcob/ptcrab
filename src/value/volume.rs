@@ -10,7 +10,7 @@ impl Volume {
     }
 
     /// Returns volume value as [`i32`].
-    pub fn as_value(&self) -> i32 {
+    pub const fn as_value(&self) -> i32 {
         self.0
     }
     /// Returns volume as a ratio.
