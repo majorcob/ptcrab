@@ -10,16 +10,16 @@ use std::io::{Read, Seek, Write};
 /// Single ptvoice "channel" with its own waveform, envelope, and parameters.
 #[derive(Clone, Debug, PartialEq)]
 pub struct PtvUnit {
-    pub basic_key: Key,
+    pub inherent_key: Key,
     pub volume: Volume,
     pub pan_volume: PanVolume,
     pub tuning: Tuning,
 
     pub flags: VoiceFlags,
-    /// Unit's waveform. pxtone technically allows this to be absent, but will crash if it attempts
-    /// to play a voice-unit without a waveform.
+    /// Unit waveform. pxtone technically allows this to be absent, but tends to crash or behave
+    /// unexpectedly while working with such voice-units. Omit with caution.
     pub wave: Option<PtvWave>,
-    /// Unit's envelope. If absent, volume will just remain constant during a note.
+    /// Unit envelope. If absent, volume will remain constant throughout a note's duration.
     pub envelope: Option<PtvEnvelope>,
 }
 
@@ -33,7 +33,7 @@ impl FromRead<Self> for PtvUnit {
     type Error = PtvError;
 
     fn from_read<R: Read>(source: &mut R) -> Result<Self, Self::Error> {
-        let basic_key = i32::from_read_var(source)?.into();
+        let inherent_key = i32::from_read_var(source).map(Key::from_basic)?;
         let volume = i32::from_read_var(source)?.into();
         let pan_volume = i32::from_read_var(source)?.into();
         let tuning = f32::from_read_var(source)?.into();
@@ -53,7 +53,7 @@ impl FromRead<Self> for PtvUnit {
             .transpose()?;
 
         Ok(Self {
-            basic_key,
+            inherent_key,
             volume,
             pan_volume,
             tuning,
@@ -69,7 +69,7 @@ impl WriteTo for PtvUnit {
     type Error = PtvError;
 
     fn write_to<W: Write + Seek>(&self, sink: &mut W) -> Result<u64, Self::Error> {
-        let start_pos = self.basic_key.as_value().write_var_to(sink)?;
+        let start_pos = self.inherent_key.as_basic().write_var_to(sink)?;
         self.volume.as_value().write_var_to(sink)?;
         self.pan_volume.as_value().write_var_to(sink)?;
         f32::from(self.tuning).write_var_to(sink)?;

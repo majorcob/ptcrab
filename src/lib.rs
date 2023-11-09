@@ -2,10 +2,10 @@
 //!
 //! ## Features
 //!
-//! - Support for both little- & big-endian systems
+//! - Support for systems of any endianness
 //! - Support for generic WASM targets (i.e. without Emscripten)
 //! - I/O using the standard library's [`Read`](std::io::Read) & [`Write`](std::io::Write) traits
-//! - Ptvoice data manipulation (as of v0.1)
+//! - Ptvoice data manipulation
 //!
 //! ### Not yet implemented
 //!
