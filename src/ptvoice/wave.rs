@@ -11,7 +11,7 @@ pub enum PtvWave {
     Coordinate {
         /// Points `(x, y)` that make up the waveform.
         points: Box<[(u8, i8)]>,
-        /// x-width of the waveform.
+        /// x-width of the waveform. Usually 256.
         x_width: i32,
     },
     Oscillator {
@@ -23,6 +23,34 @@ pub enum PtvWave {
 impl PtvWave {
     const COORDINATE: i32 = 0;
     const OSCILLATOR: i32 = 1;
+
+    /// Returns a default sine waveform.
+    pub fn default_sine() -> Self {
+        Self::Oscillator {
+            overtones: Box::new([(1, 128)]),
+        }
+    }
+    /// Returns a default triangle waveform.
+    pub fn default_triangle() -> Self {
+        Self::Coordinate {
+            points: Box::new([(0, 0), (64, 64), (192, -64)]),
+            x_width: 256,
+        }
+    }
+    /// Returns a default sawtooth waveform.
+    pub fn default_sawtooth() -> Self {
+        Self::Coordinate {
+            points: Box::new([(0, 0), (0, 32), (255, -32)]),
+            x_width: 256,
+        }
+    }
+    /// Returns a default square waveform.
+    pub fn default_square() -> Self {
+        Self::Coordinate {
+            points: Box::new([(0, 0), (0, 32), (128, 32), (128, -32), (255, -32)]),
+            x_width: 256,
+        }
+    }
 }
 
 impl FromRead<Self> for PtvWave {

@@ -117,10 +117,7 @@ impl Default for PtvUnit {
                 beat_fit: false,
             },
 
-            wave: Some(PtvWave::Coordinate {
-                points: Box::new([(0, 0)]),
-                x_width: 256,
-            }),
+            wave: Some(PtvWave::default()),
             envelope: None,
         }
     }
