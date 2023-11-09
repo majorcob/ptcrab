@@ -5,7 +5,7 @@ A pure-Rust re-implementation of [the official pxtone library](https://pxtone.or
 ## Features
 
 - Support for systems of any endianness
-- Support for generic WASM targets (i.e. without Emscripten)
+- Support for generic WASM targets, i.e. without Emscripten
 - I/O using the standard library's [`Read`](https://doc.rust-lang.org/std/io/trait.Read.html) & [`Write`](https://doc.rust-lang.org/std/io/trait.Write.html) traits
 - Ptvoice data manipulation
 
