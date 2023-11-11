@@ -18,6 +18,18 @@ pub struct PtvEnvelope {
     pub ticks_per_second: i32,
 }
 
+impl PtvEnvelope {
+    /// Creates a ptvoice envelope with the given points and release time, using the default tick
+    /// rate per second of 1000.
+    pub fn new(points: Box<[(i32, i32)]>, release: i32) -> Self {
+        Self {
+            points,
+            release,
+            ticks_per_second: 1000,
+        }
+    }
+}
+
 impl FromRead<Self> for PtvEnvelope {
     type Error = PtvError;
 
@@ -77,5 +89,11 @@ impl WriteTo for PtvEnvelope {
         (self.release, 0_i32).write_var_to(sink)?;
 
         Ok(start_pos)
+    }
+}
+
+impl Default for PtvEnvelope {
+    fn default() -> Self {
+        Self::new(Box::new([(0, 96)]), 1)
     }
 }

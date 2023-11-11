@@ -41,6 +41,14 @@ impl Ptvoice {
     /// Maximum supported format version.
     #[allow(clippy::inconsistent_digit_grouping)]
     const VERSION: i32 = 2006_01_11;
+
+    /// Creates a ptvoice with the given units.
+    pub fn new(units: Box<[PtvUnit]>) -> Self {
+        Self {
+            legacy_basic_key: 0,
+            units,
+        }
+    }
 }
 
 impl FromRead<Self> for Ptvoice {
@@ -117,9 +125,6 @@ impl WriteTo for Ptvoice {
 
 impl Default for Ptvoice {
     fn default() -> Self {
-        Self {
-            legacy_basic_key: 0,
-            units: Box::new([PtvUnit::default()]),
-        }
+        Self::new(Box::new([]))
     }
 }

@@ -24,32 +24,39 @@ impl PtvWave {
     const COORDINATE: i32 = 0;
     const OSCILLATOR: i32 = 1;
 
+    /// Creates a coordinate waveform from the given points using the default x-width of 256.
+    pub fn new_coordinate(points: Box<[(u8, i8)]>) -> Self {
+        Self::Coordinate {
+            points,
+            x_width: 256,
+        }
+    }
+    /// Creates an oscillator waveform from the given `(overtone_num, amplitude)` pairs.
+    pub fn new_oscillator(overtones: Box<[(i32, i32)]>) -> Self {
+        Self::Oscillator { overtones }
+    }
+
     /// Returns a default sine waveform.
     pub fn default_sine() -> Self {
-        Self::Oscillator {
-            overtones: Box::new([(1, 128)]),
-        }
+        Self::new_oscillator(Box::new([(1, 128)]))
     }
     /// Returns a default triangle waveform.
     pub fn default_triangle() -> Self {
-        Self::Coordinate {
-            points: Box::new([(0, 0), (64, 64), (192, -64)]),
-            x_width: 256,
-        }
+        Self::new_coordinate(Box::new([(0, 0), (64, 64), (192, -64)]))
     }
     /// Returns a default sawtooth waveform.
     pub fn default_sawtooth() -> Self {
-        Self::Coordinate {
-            points: Box::new([(0, 0), (0, 32), (255, -32)]),
-            x_width: 256,
-        }
+        Self::new_coordinate(Box::new([(0, 0), (0, 32), (255, -32)]))
     }
     /// Returns a default square waveform.
     pub fn default_square() -> Self {
-        Self::Coordinate {
-            points: Box::new([(0, 0), (0, 32), (128, 32), (128, -32), (255, -32)]),
-            x_width: 256,
-        }
+        Self::new_coordinate(Box::new([
+            (0, 0),
+            (0, 32),
+            (128, 32),
+            (128, -32),
+            (255, -32),
+        ]))
     }
 }
 
@@ -133,9 +140,6 @@ impl WriteTo for PtvWave {
 
 impl Default for PtvWave {
     fn default() -> Self {
-        Self::Coordinate {
-            points: Box::new([(0, 0)]),
-            x_width: 256,
-        }
+        Self::new_coordinate(Box::new([(0, 0)]))
     }
 }
