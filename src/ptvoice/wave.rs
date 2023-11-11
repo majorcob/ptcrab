@@ -5,7 +5,7 @@ use std::io::{Read, Seek, Write};
 
 //--------------------------------------------------------------------------------------------------
 
-/// Ptvoice waveform composed of either coordinate points or sine overtones.
+/// Ptvoice waveform composed of either coordinate points or sine-wave harmonics.
 #[derive(Clone, Debug, PartialEq)]
 pub enum PtvWave {
     Coordinate {
@@ -15,8 +15,8 @@ pub enum PtvWave {
         x_width: i32,
     },
     Oscillator {
-        /// Overtone numbers and corresponding amplitudes that make up the waveform.
-        overtones: Box<[(i32, i32)]>,
+        /// Harmonic numbers and corresponding amplitudes that make up the waveform.
+        harmonics: Box<[(i32, i32)]>,
     },
 }
 
@@ -31,9 +31,9 @@ impl PtvWave {
             x_width: 256,
         }
     }
-    /// Creates an oscillator waveform from the given `(overtone_num, amplitude)` pairs.
-    pub fn new_oscillator(overtones: Box<[(i32, i32)]>) -> Self {
-        Self::Oscillator { overtones }
+    /// Creates an oscillator waveform from the given `(harmonic_num, amplitude)` pairs.
+    pub fn new_oscillator(harmonics: Box<[(i32, i32)]>) -> Self {
+        Self::Oscillator { harmonics }
     }
 
     /// Returns a default sine waveform.
@@ -80,15 +80,15 @@ impl FromRead<Self> for PtvWave {
             }
 
             Self::OSCILLATOR => {
-                let overtone_count =
+                let harmonic_count =
                     usize::try_from(i32::from_read_var(source)?).map_err(|_| PtvError::Invalid)?;
 
-                // Read `(overtone_num, amplitude)` pairs.
-                let overtones = (0..overtone_count)
+                // Read `(harmonic_num, amplitude)` pairs.
+                let harmonics = (0..harmonic_count)
                     .map(|_| <(i32, i32)>::from_read_var(source))
                     .collect::<Result<Box<[_]>, _>>()?;
 
-                Ok(Self::Oscillator { overtones })
+                Ok(Self::Oscillator { harmonics })
             }
 
             // Unknown wave type.
@@ -119,16 +119,16 @@ impl WriteTo for PtvWave {
                 Ok(start_pos)
             }
 
-            Self::Oscillator { overtones } => {
+            Self::Oscillator { harmonics } => {
                 let start_pos = Self::OSCILLATOR.write_var_to(sink)?;
 
-                i32::try_from(overtones.len())
+                i32::try_from(harmonics.len())
                     .map_err(|_| PtvError::OverMax)?
                     .write_var_to(sink)?;
 
-                // Write `(overtone_num, amplitude)` pairs.
-                for (overtone_num, amplitude) in overtones.iter() {
-                    overtone_num.write_var_to(sink)?;
+                // Write `(harmonic_num, amplitude)` pairs.
+                for (harmonic_num, amplitude) in harmonics.iter() {
+                    harmonic_num.write_var_to(sink)?;
                     amplitude.write_var_to(sink)?;
                 }
 
