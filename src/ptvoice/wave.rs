@@ -24,33 +24,50 @@ impl PtvWave {
     const COORDINATE: i32 = 0;
     const OSCILLATOR: i32 = 1;
 
-    /// Creates a coordinate waveform from the given points using the default x-width of 256.
-    pub fn new_coordinate(points: Box<[(u8, i8)]>) -> Self {
+    /// Creates a coordinate waveform from the given points `(x, y)` using the default x-width of
+    /// 256.
+    pub fn coordinate_from_points(points: Box<[(u8, i8)]>) -> Self {
         Self::Coordinate {
             points,
             x_width: 256,
         }
     }
+    /// Creates a coordinate waveform from a function f(x) = y over x = [0, 1) with the given number
+    /// of points.
+    ///
+    /// The official ptvoice editor will refuse to open waveforms with more than 31 points.
+    pub fn coordinate_from_function(point_count: u8, y_function: impl Fn(f32) -> f32) -> Self {
+        Self::coordinate_from_points(
+            (0..point_count)
+                .map(|i| {
+                    let x = i as f32 / point_count as f32;
+
+                    ((256. * x) as u8, (127. * y_function(x)) as i8)
+                })
+                .collect(),
+        )
+    }
+
     /// Creates an oscillator waveform from the given `(harmonic_num, amplitude)` pairs.
-    pub fn new_oscillator(harmonics: Box<[(i32, i32)]>) -> Self {
+    pub fn oscillator_from_pairs(harmonics: Box<[(i32, i32)]>) -> Self {
         Self::Oscillator { harmonics }
     }
 
     /// Returns a default sine waveform.
     pub fn default_sine() -> Self {
-        Self::new_oscillator(Box::new([(1, 128)]))
+        Self::oscillator_from_pairs(Box::new([(1, 128)]))
     }
     /// Returns a default triangle waveform.
     pub fn default_triangle() -> Self {
-        Self::new_coordinate(Box::new([(0, 0), (64, 64), (192, -64)]))
+        Self::coordinate_from_points(Box::new([(0, 0), (64, 64), (192, -64)]))
     }
     /// Returns a default sawtooth waveform.
     pub fn default_sawtooth() -> Self {
-        Self::new_coordinate(Box::new([(0, 0), (0, 32), (255, -32)]))
+        Self::coordinate_from_points(Box::new([(0, 0), (0, 32), (255, -32)]))
     }
     /// Returns a default square waveform.
     pub fn default_square() -> Self {
-        Self::new_coordinate(Box::new([
+        Self::coordinate_from_points(Box::new([
             (0, 0),
             (0, 32),
             (128, 32),
@@ -140,6 +157,6 @@ impl WriteTo for PtvWave {
 
 impl Default for PtvWave {
     fn default() -> Self {
-        Self::new_coordinate(Box::new([(0, 0)]))
+        Self::coordinate_from_points(Box::new([(0, 0)]))
     }
 }
