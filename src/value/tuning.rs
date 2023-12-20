@@ -1,6 +1,6 @@
 /// Multiplier applied to a unit's pitch.
 ///
-/// Negative values will cause unstable/unpleasant behaviour in pxtone, so use with caution.
+/// Negative values will cause crashes or other unpleasant behaviour in pxtone, so use with caution.
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[repr(transparent)]
 pub struct Tuning(f32);
