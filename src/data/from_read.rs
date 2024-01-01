@@ -2,6 +2,8 @@ use duplicate::duplicate_item;
 use std::error::Error as StdError;
 use std::io::{Error as IoError, Read};
 
+//--------------------------------------------------------------------------------------------------
+
 /// Provides a constructor that reads data from some source.
 pub trait FromRead<T>: Sized {
     /// Error type on read failure.
@@ -42,5 +44,17 @@ impl FromRead<Self> for _Num_ {
 
     fn from_read<R: Read>(source: &mut R) -> Result<Self, Self::Error> {
         read_n(source).map(Self::from_le_bytes)
+    }
+}
+
+impl<X, Y> FromRead<Self> for (X, Y)
+where
+    X: FromRead<X, Error = IoError>,
+    Y: FromRead<Y, Error = IoError>,
+{
+    type Error = IoError;
+
+    fn from_read<R: Read>(source: &mut R) -> Result<Self, Self::Error> {
+        X::from_read(source).and_then(|x| Y::from_read(source).map(|y| (x, y)))
     }
 }

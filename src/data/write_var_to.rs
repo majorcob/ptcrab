@@ -4,6 +4,8 @@ use duplicate::duplicate_item;
 use std::error::Error as StdError;
 use std::io::{Error as IoError, Seek, Write};
 
+//--------------------------------------------------------------------------------------------------
+
 /// Allows encoding `self` as an [unsigned LEB128](https://en.wikipedia.org/wiki/LEB128#Unsigned_LEB128)
 /// sequence written to some sink.
 pub trait WriteVarTo {
@@ -44,5 +46,19 @@ impl WriteVarTo for _Num32_ {
         }
 
         Ok(start_pos)
+    }
+}
+
+impl<X, Y> WriteVarTo for (X, Y)
+where
+    X: WriteVarTo<Error = IoError>,
+    Y: WriteVarTo<Error = IoError>,
+{
+    type Error = IoError;
+
+    fn write_var_to<W: Write + Seek>(&self, sink: &mut W) -> Result<u64, Self::Error> {
+        self.0
+            .write_var_to(sink)
+            .and_then(|start_pos| self.1.write_var_to(sink).map(|_| start_pos))
     }
 }
