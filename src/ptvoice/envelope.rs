@@ -35,8 +35,9 @@ impl FromRead<Self> for PtvEnvelope {
 
     fn from_read<R: Read>(source: &mut R) -> Result<Self, Self::Error> {
         let ticks_per_second = i32::from_read_var(source)?;
-        let point_count =
-            usize::try_from(i32::from_read_var(source)?).map_err(|_| PtvError::Invalid)?;
+        let point_count: usize = i32::from_read_var(source)?
+            .try_into()
+            .map_err(|_| PtvError::Invalid)?;
         // Read unused point counts, verifying that their values are 0 and 1 respectively. These are
         // leftovers from when pxtone was planned to have separate attack, sustain, and release
         // envelopes; now, there must be exactly 0 sustain points and exactly 1 release point.
@@ -73,7 +74,7 @@ impl WriteTo for PtvEnvelope {
     fn write_to<W: Write + Seek>(&self, sink: &mut W) -> Result<u64, Self::Error> {
         let start_pos = self.ticks_per_second.write_var_to(sink)?;
         i32::try_from(self.points.len())
-            .map_err(|_| PtvError::OverMax)?
+            .map_err(|_| PtvError::Oversized)?
             .write_var_to(sink)?;
         // Unused sustain & release point counts, always expected to be 0 and 1.
         0_i32.write_var_to(sink)?;

@@ -21,7 +21,7 @@ use std::io::{Read, Seek, Write};
 
 type PtvSignature = [u8; 8];
 
-/// Synthesized instrument made up of sine overtones and drawn waveforms.
+/// Synthesized instrument made up of sine harmonics and coordinate-defined waveforms.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Ptvoice {
     /// Basic key applied to the entire project voice in old pxtone versions. Each voice-unit has
@@ -75,8 +75,9 @@ impl FromRead<Self> for Ptvoice {
         }
 
         // Read units...
-        let unit_count =
-            usize::try_from(i32::from_read_var(source)?).map_err(|_| PtvError::Invalid)?;
+        let unit_count: usize = i32::from_read_var(source)?
+            .try_into()
+            .map_err(|_| PtvError::Invalid)?;
         let units = (0..unit_count)
             .map(|_| PtvUnit::from_read(source))
             .collect::<Result<Box<[_]>, _>>()?;
@@ -92,7 +93,7 @@ impl WriteTo for Ptvoice {
     type Error = PtvError;
 
     fn write_to<W: Write + Seek>(&self, sink: &mut W) -> Result<u64, Self::Error> {
-        // ptvoice signature and format version.
+        // Ptvoice signature and format version.
         let start_pos = Self::SIGNATURE.write_to(sink)?;
         Self::VERSION.write_to(sink)?;
         // Placeholder for remaining data length (to be written later).
@@ -106,7 +107,7 @@ impl WriteTo for Ptvoice {
 
         // Units...
         i32::try_from(self.units.len())
-            .map_err(|_| PtvError::OverMax)?
+            .map_err(|_| PtvError::Oversized)?
             .write_var_to(sink)?;
         for unit in self.units.iter() {
             unit.write_to(sink)?;
@@ -114,7 +115,7 @@ impl WriteTo for Ptvoice {
 
         // Go back to update data length.
         let data_end = sink.stream_position()?;
-        let data_len = i32::try_from(data_end - data_start).map_err(|_| PtvError::OverMax)?;
+        let data_len = i32::try_from(data_end - data_start).map_err(|_| PtvError::Oversized)?;
         sink.seek(SeekFrom::Start(data_len_pos))?;
         data_len.write_to(sink)?;
         sink.seek(SeekFrom::Start(data_end))?;

@@ -11,6 +11,9 @@ pub enum PtvWave {
     Coordinate {
         /// Points `(x, y)` that make up the waveform.
         ///
+        /// **Points should be ordered by increasing x-coordinate.** Unsorted points can cause
+        /// bizarre behaviour in pxtone.
+        ///
         /// The official ptvoice editor will refuse to open waveforms with more than 31 points,
         /// though pxtone seems to be able to handle as many as 254 points.
         points: Box<[(u8, i8)]>,
@@ -20,7 +23,7 @@ pub enum PtvWave {
     Oscillator {
         /// Harmonic numbers and corresponding amplitudes that make up the waveform.
         ///
-        /// The "0th" harmonic is always silent, and negative harmonic numbers will crash pxtone.
+        /// Harmonic number 0 is always silent, and negative harmonic numbers will crash pxtone.
         harmonics: Box<[(i32, i32)]>,
     },
 }
@@ -31,6 +34,12 @@ impl PtvWave {
 
     /// Creates a coordinate waveform from the given points `(x, y)` using the default x-width of
     /// 256.
+    ///
+    /// **Points should be ordered by increasing x-coordinate.** Unsorted points can cause bizarre
+    /// behaviour in pxtone.
+    ///
+    /// The official ptvoice editor will refuse to open waveforms with more than 31 points, though
+    /// pxtone seems to be able to handle as many as 254 points.
     pub fn coordinate_from_points(points: Box<[(u8, i8)]>) -> Self {
         Self::Coordinate {
             points,
@@ -56,7 +65,7 @@ impl PtvWave {
 
     /// Creates an oscillator waveform from the given `(harmonic_num, amplitude)` pairs.
     ///
-    /// The "0th" harmonic is always silent, and negative harmonic numbers will crash pxtone.
+    /// Harmonic number 0 is always silent, and negative harmonic numbers will crash pxtone.
     pub fn oscillator_from_pairs(harmonics: Box<[(i32, i32)]>) -> Self {
         Self::Oscillator { harmonics }
     }
@@ -69,8 +78,9 @@ impl FromRead<Self> for PtvWave {
         // Read & match wave type.
         match i32::from_read_var(source)? {
             Self::COORDINATE => {
-                let point_count =
-                    usize::try_from(i32::from_read_var(source)?).map_err(|_| PtvError::Invalid)?;
+                let point_count: usize = i32::from_read_var(source)?
+                    .try_into()
+                    .map_err(|_| PtvError::Invalid)?;
                 let x_width = i32::from_read_var(source)?;
 
                 // Read `(x, y)` pairs.
@@ -82,8 +92,9 @@ impl FromRead<Self> for PtvWave {
             }
 
             Self::OSCILLATOR => {
-                let harmonic_count =
-                    usize::try_from(i32::from_read_var(source)?).map_err(|_| PtvError::Invalid)?;
+                let harmonic_count: usize = i32::from_read_var(source)?
+                    .try_into()
+                    .map_err(|_| PtvError::Invalid)?;
 
                 // Read `(harmonic_num, amplitude)` pairs.
                 let harmonics = (0..harmonic_count)
@@ -108,7 +119,7 @@ impl WriteTo for PtvWave {
                 let start_pos = Self::COORDINATE.write_var_to(sink)?;
 
                 i32::try_from(points.len())
-                    .map_err(|_| PtvError::OverMax)?
+                    .map_err(|_| PtvError::Oversized)?
                     .write_var_to(sink)?;
                 x_width.write_var_to(sink)?;
 
@@ -125,7 +136,7 @@ impl WriteTo for PtvWave {
                 let start_pos = Self::OSCILLATOR.write_var_to(sink)?;
 
                 i32::try_from(harmonics.len())
-                    .map_err(|_| PtvError::OverMax)?
+                    .map_err(|_| PtvError::Oversized)?
                     .write_var_to(sink)?;
 
                 // Write `(harmonic_num, amplitude)` pairs.
