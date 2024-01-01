@@ -106,7 +106,7 @@ impl WriteTo for PtvUnit {
 impl Default for PtvUnit {
     fn default() -> Self {
         Self {
-            inherent_key: Key::from_basic(0x2D00),
+            inherent_key: Key::A6,
             volume: Volume::from(64),
             pan_volume: PanVolume::CENTER,
             tuning: Tuning::default(),

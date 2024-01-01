@@ -1,16 +1,16 @@
-//! A pure-Rust re-implementation of [the official pxtone library](https://pxtone.org/developer) with a safer, more intuitive API.
+//! A pure-Rust alternative to [the official pxtone library](https://pxtone.org/developer).
 //!
 //! ## Features
 //!
 //! - Support for systems of any endianness
-//! - Support for generic WASM targets, i.e. without Emscripten
-//! - I/O using the standard library's [`Read`](std::io::Read) & [`Write`](std::io::Write) traits
+//! - Support for generic Wasm targets
+//! - I/O using standard [`Read`](std::io::Read) & [`Write`](std::io::Write) traits
 //! - Ptvoice data manipulation
 //!
 //! ### Not yet implemented
 //!
 //! - Ptnoise data manipulation
-//! - Project data (ptcop/pttune) manipulation
+//! - Project (ptcop/pttune) data manipulation
 //! - Audio rendering/playback
 //!
 //! ## License

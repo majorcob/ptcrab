@@ -13,7 +13,7 @@ impl Key {
     /// Middle C tone.
     pub const C4: Self = Self(87 * 256);
     /// A<sub>6</sub> tone (the default ptvoice inherent key).
-    pub const A6: Self = Self(120 * 256);
+    pub const A6: Self = Self::from_basic(0x2D00);
 
     /// Basic key reference value.
     pub const BASIC: i32 = 0x4500;
@@ -79,7 +79,7 @@ impl Key {
     /// Samples that are not inherently pitched to A<sub>4</sub> can be corrected by modifying the
     /// voice's "basic key", which causes its key to be offset by a constant reference value
     /// ([`Key::BASIC`]) minus that voice's basic key value. As such, *increasing* the voice's
-    /// basic key value will *decrease* its pitch and vice versa.
+    /// basic key value will *decrease* its inherent pitch and vice versa.
     ///
     /// ```
     /// # use ptcrab::Key;
@@ -172,7 +172,7 @@ impl Key {
     /// Samples that are not inherently pitched to A<sub>4</sub> can be corrected by modifying the
     /// voice's "basic key", which causes its key to be offset by a constant reference value
     /// ([`Self::BASIC`]) minus that voice's basic key value. As such, *increasing* the voice's
-    /// basic key value will *decrease* its pitch and vice versa.
+    /// basic key value will *decrease* its inherent pitch and vice versa.
     ///
     /// ```
     /// # use ptcrab::Key;
