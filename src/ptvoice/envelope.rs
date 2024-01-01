@@ -11,8 +11,15 @@ use std::io::{Read, Seek, Write};
 pub struct PtvEnvelope {
     /// List of absolute points `(x, y)` in the envelope. The last point in this list will be
     /// sustained while a note is held.
+    ///
+    /// **Points should be ordered by increasing x-coordinate.** Unsorted points can cause bizarre
+    /// behaviour in pxtone. Also, points with y = 0 can behave strangely if they share a tick with
+    /// another point, so consider moving such points to an adjacent tick.
+    ///
+    /// The official ptvoice editor will refuse to open envelopes with more than 31 points, though
+    /// pxtone seems to be able to handle an arbitrary number of points.
     pub points: Box<[(i32, i32)]>,
-    /// Release duration in ticks.
+    /// Release duration in ticks. Envelopes will behave strangely if this is less than 1.
     pub release: i32,
     /// Envelope tick rate. Usually set to 1000 so that 1 tick = 1 millisecond.
     pub ticks_per_second: i32,
@@ -21,6 +28,13 @@ pub struct PtvEnvelope {
 impl PtvEnvelope {
     /// Creates a ptvoice envelope with the given points and release time, using the default tick
     /// rate per second of 1000.
+    ///
+    /// **Points should be ordered by increasing x-coordinate.** Unsorted points can cause bizarre
+    /// behaviour in pxtone. Also, points with y = 0 can behave strangely if they share a tick with
+    /// another point, so consider moving such points to an adjacent tick.
+    ///
+    /// The official ptvoice editor will refuse to open envelopes with more than 31 points, though
+    /// pxtone seems to be able to handle an arbitrary number of points.
     pub fn new(points: Box<[(i32, i32)]>, release: i32) -> Self {
         Self {
             points,

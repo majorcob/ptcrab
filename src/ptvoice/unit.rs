@@ -10,9 +10,9 @@ use std::io::{Read, Seek, Write};
 /// Single ptvoice "channel" with its own waveform, envelope, and parameters.
 #[derive(Clone, Debug, PartialEq)]
 pub struct PtvUnit {
-    /// Since ptvoices don't really have an inherent pitch (as opposed to samples), this is usually
-    /// just set to A<sub>6</sub> (basic key `0x2D00`) by default. However, changing this allows for
-    /// some interesting harmonic effects on a single ptvoice.
+    /// Since ptvoices don't really have an inherent pitch (as opposed to samples), this is just set
+    /// to A<sub>6</sub> (basic key `0x2D00`) by default. This can be changed to create harmonic
+    /// intervals between units in a single ptvoice.
     pub inherent_key: Key,
     /// Overall volume for this unit.
     pub volume: Volume,

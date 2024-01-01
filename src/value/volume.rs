@@ -1,3 +1,7 @@
+use std::ops::Mul;
+
+//--------------------------------------------------------------------------------------------------
+
 /// Volume ratio where a value of 128 = 100% volume.
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[repr(transparent)]
@@ -28,5 +32,13 @@ impl From<i32> for Volume {
 impl Default for Volume {
     fn default() -> Self {
         Self::from(128)
+    }
+}
+
+impl Mul<f32> for Volume {
+    type Output = Self;
+
+    fn mul(self, rhs: f32) -> Self::Output {
+        Self::from_ratio(self.as_ratio() * rhs)
     }
 }
